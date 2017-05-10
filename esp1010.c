@@ -390,6 +390,7 @@ static int esp_init(struct snd_ice1712 *ice)
   ice->akm = ak = kmalloc(sizeof(struct snd_akm4xxx),GFP_KERNEL);
   if(!ak)
     return -ENOMEM;
+  ice->akm_codecs = 1;
   err = snd_ice1712_akm4xxx_init(ak, &akm_esp_dac, NULL, ice);
   return err;
   
