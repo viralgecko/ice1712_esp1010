@@ -123,17 +123,18 @@ static int esp_cpld_write_vbyte(struct snd_ice1712 *ice, unsigned char data, uns
 
 static int esp_i2c_read(struct snd_ice1712 *ice, unsigned char addr, unsigned char chip)
 {
-  snd_ice1712_write(ice, ICE1712_REG_I2C_BYTE_ADDR, addr);
-  snd_ice1712_write(ice, ICE1712_REG_I2C_DEV_ADDR, chip);
+  outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
+  outb(chip & 0x7F, ICEREG(ice, I2C_DEV_ADDR));
   udelay(32);
-  return snd_ice1712_read(ice, ICE1712_REG_I2C_DATA);
+  return inb(ICEREG(ice, I2C_DATA));
 }
 
 static void esp_i2c_write(struct snd_ice1712 *ice, unsigned char data, unsigned char addr, unsigned char chip)
 {
-  snd_ice1712_write(ice, ICE1712_REG_I2C_BYTE_ADDR, addr);
-  snd_ice1712_write(ice, ICE1712_REG_I2C_DATA, data);
-  snd_ice1712_write(ice, ICE1712_REG_I2C_DEV_ADDR, chip | ICE1712_I2C_WRITE);
+  outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
+  outb(data, ICEREG(ice, I2C_DATA));
+  outb((chip & 0x7F) | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
+  udelay(32);
 }
 
 /* 
