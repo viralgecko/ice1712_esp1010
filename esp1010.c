@@ -180,6 +180,26 @@ static int snd_ice1712_esp_hp_en_info(struct snd_kcontrol *kcontrol, struct snd_
   return 0;
 }
 
+#ifdef CONFIG_PM_SLEEP
+static int esp_resume(struct snd_ice1712 *ice)
+{
+  struct snd_akm4xxx *ak = ice->akm;
+  struct esp_spec *spec = ice->spec;
+  snd_akm4xxx_reset(ak, 0);
+  snd_ak4114_resume(spec->ak4114);
+  return 0;
+}
+
+static int esp_suspend(struct snd_ice1712 *ice)
+{
+  struct snd_akm4xxx *ak = ice->akm;
+  struct esp_spec *spec = ice->spec;
+  snd_akm4xxx_reset(ak, 1);
+  snd_ak4114_suspend(spec->ak4114);
+  return 0;
+}
+#endif
+
 static int snd_ice1712_esp_hp_en_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *value)
 {
   struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
@@ -388,13 +408,17 @@ static int esp_init(struct snd_ice1712 *ice)
 		    ice, &spec->ak4114);
   if(err < 0)
     return err;
+#ifdef CONFIG_PM_SLEEP
+  ice->pm_resume = esp_resume;
+  ice->pm_suspend = esp_suspend;
+  ice->pm_suspend_enabled = 1;
+#endif
   ice->akm = ak = kmalloc(sizeof(struct snd_akm4xxx),GFP_KERNEL);
   if(!ak)
     return -ENOMEM;
   ice->akm_codecs = 1;
   err = snd_ice1712_akm4xxx_init(ak, &akm_esp_dac, NULL, ice);
   return err;
-  
   
 }
 
