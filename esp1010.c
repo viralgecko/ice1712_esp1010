@@ -121,22 +121,6 @@ static int esp_cpld_write_vbyte(struct snd_ice1712 *ice, unsigned char data, uns
   return 0;
 }
 
-static int esp_i2c_read(struct snd_ice1712 *ice, unsigned char addr, unsigned char chip)
-{
-  outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
-  outb(chip & 0x7F, ICEREG(ice, I2C_DEV_ADDR));
-  udelay(32);
-  return inb(ICEREG(ice, I2C_DATA));
-}
-
-static void esp_i2c_write(struct snd_ice1712 *ice, unsigned char data, unsigned char addr, unsigned char chip)
-{
-  outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
-  outb(data, ICEREG(ice, I2C_DATA));
-  outb((chip & 0x7F) | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
-  udelay(32);
-}
-
 /* 
  * AK4358 section
  */
@@ -152,7 +136,7 @@ static void esp_akm_unlock(struct snd_akm4xxx *ak, int chip)
 static void esp_akm_write(struct snd_akm4xxx *ak, int chip, unsigned char addr, unsigned char data)
 {
   struct snd_ice1712 *ice = ak->private_data[0];
-  esp_i2c_write(ice, data, addr, ESP_AK4358_ADDR);
+  snd_ice1712_write_i2c(ice, ESP_AK4358_ADDR, addr, data);
 }
 
 /* 
@@ -162,13 +146,13 @@ static void esp_akm_write(struct snd_akm4xxx *ak, int chip, unsigned char addr, 
 static void esp_ak4114_write(void *privdata, unsigned char reg, unsigned char val)
 {
   struct snd_ice1712 *ice = (struct snd_ice1712 *)privdata;
-  esp_i2c_write(ice, val, reg, ESP_AK4114_ADDR);
+  snd_ice1712_write_i2c(ice, ESP_AK4114_ADDR, reg, val);
 }
 
 static unsigned char esp_ak4114_read(void *privdata, unsigned char reg)
 {
   struct snd_ice1712 *ice = (struct snd_ice1712 *)privdata;
-  return esp_i2c_read(ice, reg, ESP_AK4114_ADDR);
+  return snd_ice1712_read_i2c(ice, ESP_AK4114_ADDR, reg);
 }
 
 static int snd_ice1712_esp_hp_en_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *info)

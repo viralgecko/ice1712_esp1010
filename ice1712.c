@@ -47,6 +47,9 @@
  *
  * 2017.05.08 Andreas Merl <merl.andreas@outlook.com>
  *    Added support for ESI ESP1010 cart with esp1010.c.
+ *
+ * 2017.05.17 Andreas Merl <merl.andreas@outlook.com>
+ *    Added function to write through I2C interface.
  */
 
 
@@ -2286,6 +2289,16 @@ static unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice,
 	outb(dev & ~ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
 	while (t-- > 0 && (inb(ICEREG(ice, I2C_CTRL)) & ICE1712_I2C_BUSY)) ;
 	return inb(ICEREG(ice, I2C_DATA));
+}
+
+static void snd_ice1712_write_i2c(struct snd_ice1712 *ice,
+					  unsigned char dev,
+					  unsigned char addr,
+					  unsigned char data)
+{
+        outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
+	outb(data, ICEREG(ice, I2C_DATA));
+	out(dev | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
 }
 
 static int snd_ice1712_read_eeprom(struct snd_ice1712 *ice,

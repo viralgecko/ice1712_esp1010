@@ -512,6 +512,11 @@ static inline u8 snd_ice1712_read(struct snd_ice1712 *ice, u8 addr)
 	return inb(ICEREG(ice, DATA));
 }
 
+/* I2C interface functions*/
+static unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr);
+
+static void snd_ice1712_write_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr, unsigned char data);
+
 
 /*
  * entry pointer
