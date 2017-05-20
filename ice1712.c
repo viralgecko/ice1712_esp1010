@@ -2279,7 +2279,7 @@ static struct snd_ice1712_card_info *card_tables[] = {
 	NULL,
 };
 
-static unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice,
+/*static unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice,
 					  unsigned char dev,
 					  unsigned char addr)
 {
@@ -2298,8 +2298,8 @@ static void snd_ice1712_write_i2c(struct snd_ice1712 *ice,
 {
         outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
 	outb(data, ICEREG(ice, I2C_DATA));
-	out(dev | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
-}
+	outb(dev | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
+	}*/
 
 static int snd_ice1712_read_eeprom(struct snd_ice1712 *ice,
 				   const char *modelname)
