@@ -2279,27 +2279,32 @@ static struct snd_ice1712_card_info *card_tables[] = {
 	NULL,
 };
 
-/*static unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice,
+unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice,
 					  unsigned char dev,
 					  unsigned char addr)
 {
 	long t = 0x10000;
-
+	unsigned char val;
+	mutex_lock(&ice->i2c_mutex);
 	outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
 	outb(dev & ~ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
 	while (t-- > 0 && (inb(ICEREG(ice, I2C_CTRL)) & ICE1712_I2C_BUSY)) ;
-	return inb(ICEREG(ice, I2C_DATA));
+	val = inb(ICEREG(ice, I2C_DATA));
+	mutex_unlock(&ice->i2c_mutex);
+	return val;
 }
 
-static void snd_ice1712_write_i2c(struct snd_ice1712 *ice,
+void snd_ice1712_write_i2c(struct snd_ice1712 *ice,
 					  unsigned char dev,
 					  unsigned char addr,
 					  unsigned char data)
 {
+        mutex_lock(&ice->i2c_mutex);
         outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
 	outb(data, ICEREG(ice, I2C_DATA));
 	outb(dev | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
-	}*/
+	mutex_unlock(&ice->i2c_mutex);
+}
 
 static int snd_ice1712_read_eeprom(struct snd_ice1712 *ice,
 				   const char *modelname)
