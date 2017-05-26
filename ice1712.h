@@ -513,22 +513,9 @@ static inline u8 snd_ice1712_read(struct snd_ice1712 *ice, u8 addr)
 }
 
 /* I2C interface functions*/
-unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr)
-{
-	long t = 0x10000;
+unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr);
 
-	outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
-	outb(dev & ~ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
-	while (t-- > 0 && (inb(ICEREG(ice, I2C_CTRL)) & ICE1712_I2C_BUSY)) ;
-	return inb(ICEREG(ice, I2C_DATA));
-}
-
-void snd_ice1712_write_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr, unsigned char data)
-{
-        outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
-	outb(data, ICEREG(ice, I2C_DATA));
-	outb(dev | ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
-}
+void snd_ice1712_write_i2c(struct snd_ice1712 *ice, unsigned char dev, unsigned char addr, unsigned char data);
 
 
 /*

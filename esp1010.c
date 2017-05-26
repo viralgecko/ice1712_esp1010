@@ -334,14 +334,23 @@ static struct snd_kcontrol_new esp_mic_vol = {
   .tlv.p = db_scale_esp_mic_vol
 };
 
+static const struct snd_akm4xxx_dac_channel esp_dac[] = {
+  { .name = "OUT12", .num_channels = 2 },
+  { .name = "OUT34", .num_channels = 2 },
+  { .name = "OUT56", .num_channels = 2 },
+  { .name = "OUT78", .num_channels = 2 },
+};
+
 static const struct snd_akm4xxx akm_esp_dac = {
   .type = SND_AK4358,
+  .num_adcs = 0,
   .num_dacs = 8,
   .ops = {
     .lock = esp_akm_lock,
     .unlock = esp_akm_unlock,
     .write = esp_akm_write
   },
+  .dac_info = esp_dac,
 };
 
 static int esp_init(struct snd_ice1712 *ice)
