@@ -188,8 +188,8 @@ static unsigned char esp_ak4114_read(void *privdata, unsigned char reg)
 static void esp_ak4114_change(struct ak4114* ak4114, unsigned char c0, unsigned char c1)
 {
   struct snd_ice1712 *ice = ak4114->change_callback_private;
-  if(ice->id_spdif_master(ice) && c1)
-    esp_akm_set_rate(akm, snd_ak4114_external_rate(ak4114));
+  if(ice->is_spdif_master(ice) && c1)
+    esp_akm_set_rate(ice->akm, snd_ak4114_external_rate(ak4114));
 }
 
 static int snd_ice1712_esp_hp_en_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *info)
