@@ -139,20 +139,46 @@ static void esp_akm_write(struct snd_akm4xxx *ak, int chip, unsigned char addr, 
   snd_ice1712_write_i2c(ice, ESP_AK4358_ADDR, addr, data);
 }
 
+static void esp_akm_set_rate(struct snd_akm4xxx *ak, unsigned int rate)
+{
+  unsigned char manuel = snd_akm4xxx_get(ak, 0, 0);
+  unsigned char pwr = snd_akm4xxx_get(ak, 0, 2);
+  if(!(manuel & 0x80))
+    {
+      snd_akm4xxx_reset(ak,1);
+      switch(rate){
+      case 44100:
+      case 48000:
+	snd_akm4xxx_set(ak, 0, 2, pwr & ~0xC0);
+	break;
+      case 88200:
+      case 96000:
+	snd_akm4xxx_set(ak, 0, 2, (pwr & ~0xC0) | 0x40);
+	break;
+      }
+      snd_akm4xxx_reset(ak,0);
+    }
+}
+
 /* 
  * AK4114 section
  */
 
 static void esp_ak4114_write(void *privdata, unsigned char reg, unsigned char val)
 {
-  struct snd_ice1712 *ice = (struct snd_ice1712 *)privdata;
-  snd_ice1712_write_i2c(ice, ESP_AK4114_ADDR, reg, val);
+  snd_ice1712_write_i2c((struct snd_ice1712 *)privdata, ESP_AK4114_ADDR, reg, val);
 }
 
 static unsigned char esp_ak4114_read(void *privdata, unsigned char reg)
 {
-  struct snd_ice1712 *ice = (struct snd_ice1712 *)privdata;
-  return snd_ice1712_read_i2c(ice, ESP_AK4114_ADDR, reg);
+  return snd_ice1712_read_i2c((struct snd_ice1712 *)privdata, ESP_AK4114_ADDR, reg);
+}
+
+static void esp_ak4114_change(struct ak4114* ak4114, unsigned char c0, unsigned char c1)
+{
+  struct snd_ice1712 *ice = ak4114->change_callback_private;
+  if(ice->id_spdif_master(ice) && c1)
+    esp_akm_set_rate(akm, snd_ak4114_external_rate(ak4114));
 }
 
 static int snd_ice1712_esp_hp_en_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *info)
@@ -348,19 +374,18 @@ static const struct snd_akm4xxx akm_esp_dac = {
   .ops = {
     .lock = esp_akm_lock,
     .unlock = esp_akm_unlock,
-    .write = esp_akm_write
+    .write = esp_akm_write,
+    .set_rate_val = esp_akm_set_rate
   },
   .dac_info = esp_dac,
 };
 
 static int esp_init(struct snd_ice1712 *ice)
 {
-    static const unsigned char ak4114_val[] = { AK4114_RST | AK4114_PWN |
-      			AK4114_OCKS0 | AK4114_OCKS1,
+    static const unsigned char ak4114_val[] = { AK4114_RST | AK4114_PWN,
 			AK4114_DIF_I24I2S,
 			AK4114_TX1E,
-			AK4114_EFH_1024 | AK4114_DIT |
-			AK4114_IPS(1),
+			AK4114_EFH_1024 | AK4114_DIT,
 			0,
 			0
   };
@@ -399,6 +424,9 @@ static int esp_init(struct snd_ice1712 *ice)
 		    ak4114_val,
 		    ak4114_txcsb,
 		    ice, &spec->ak4114);
+  spec->ak4114->change_callback = esp_ak4114_change;
+  spec->ak4114->change_callback_private = ice;
+  spec->ak4114->check_flags = 0;
   if(err < 0)
     return err;
 #ifdef CONFIG_PM_SLEEP
