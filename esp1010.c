@@ -44,6 +44,17 @@ struct esp_spec{
   unsigned char micv1;
 };
 
+static unsigned int esp_rates[] = {
+	44100, 48000,
+	88200, 96000,
+};
+
+static struct snd_pcm_hw_constraint_list esp_rates_info = {
+  .count = ARRAY_SIZE(esp_rates),
+  .list = esp_rates,
+  .mask = 0,
+};
+
 static int esp_cpld_write_byte(struct snd_ice1712 *ice, unsigned char data, unsigned char addr)
 {
   char mask;
@@ -427,6 +438,7 @@ static int esp_init(struct snd_ice1712 *ice)
   spec->ak4114->change_callback = esp_ak4114_change;
   spec->ak4114->change_callback_private = ice;
   spec->ak4114->check_flags = 0;
+  ice->hw_rates = &esp_rates_info;
   if(err < 0)
     return err;
 #ifdef CONFIG_PM_SLEEP
