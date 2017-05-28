@@ -45,7 +45,8 @@ struct esp_spec{
 };
 
 static unsigned int esp_rates[] = {
-	44100, 48000,
+        32000, 44100,
+	48000, 64000,
 	88200, 96000,
 };
 
@@ -157,16 +158,12 @@ static void esp_akm_set_rate(struct snd_akm4xxx *ak, unsigned int rate)
   if(!(manuel & 0x80))
     {
       snd_akm4xxx_reset(ak,1);
-      switch(rate){
-      case 44100:
-      case 48000:
+      if(!rate)
+	return;
+      else if( rate < 48000)
 	snd_akm4xxx_set(ak, 0, 2, pwr & ~0xC0);
-	break;
-      case 88200:
-      case 96000:
+      else
 	snd_akm4xxx_set(ak, 0, 2, (pwr & ~0xC0) | 0x40);
-	break;
-      }
       snd_akm4xxx_reset(ak,0);
     }
 }
@@ -437,7 +434,7 @@ static int esp_init(struct snd_ice1712 *ice)
 		    ice, &spec->ak4114);
   spec->ak4114->change_callback = esp_ak4114_change;
   spec->ak4114->change_callback_private = ice;
-  spec->ak4114->check_flags = 0;
+  spec->ak4114->check_flags = AK4114_CHECK_NO_RATE | AK4114_CHECK_NO_STAT;
   ice->hw_rates = &esp_rates_info;
   if(err < 0)
     return err;
