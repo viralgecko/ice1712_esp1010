@@ -2289,6 +2289,8 @@ unsigned char snd_ice1712_read_i2c(struct snd_ice1712 *ice,
 	printk(KERN_DEBUG "snd_ice1712_read_i2c: caller: 0x%02X\n", addr);
 	#endif
 	mutex_lock(&ice->i2c_mutex);
+	while (t-- > 0 && (inb(ICEREG(ice, I2C_CTRL)) & ICE1712_I2C_BUSY)) ;
+	t=0x10000;
 	outb(addr, ICEREG(ice, I2C_BYTE_ADDR));
 	outb(dev & ~ICE1712_I2C_WRITE, ICEREG(ice, I2C_DEV_ADDR));
 	while (t-- > 0 && (inb(ICEREG(ice, I2C_CTRL)) & ICE1712_I2C_BUSY)) ;
