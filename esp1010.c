@@ -63,6 +63,7 @@ static int esp_cpld_write_byte(struct snd_ice1712 *ice, unsigned char data, unsi
   char gpio_bit;
   char dir;
   int i;
+  mutex_lock(&ice->i2c_mutex);
   mask = (char)ice->gpio.write_mask;
   if(mask & ESP_CPLD_MASK)
     return -1;
@@ -90,6 +91,7 @@ static int esp_cpld_write_byte(struct snd_ice1712 *ice, unsigned char data, unsi
       udelay(1);
     }
   snd_ice1712_gpio_write(ice, gpio_val | ESP_CPLD_MASK);
+  mutex_unlock(&ice->i2c_mutex);
   return 0;
 }
 
@@ -101,6 +103,7 @@ static int esp_cpld_write_vbyte(struct snd_ice1712 *ice, unsigned char data, uns
   char dir;
   uint16_t addr1, data1;
   int i;
+  mutex_lock(&ice->i2c_mutex);
   mask = (char)ice->gpio.write_mask;
   if(mask & ESP_CPLD_MASK)
     return -1;
@@ -130,6 +133,7 @@ static int esp_cpld_write_vbyte(struct snd_ice1712 *ice, unsigned char data, uns
       if(i == 7)
 	gpio_val ^= 0x20;
     }
+  mutex_unlock(&ice->i2c_mutex);
   return 0;
 }
 
