@@ -164,10 +164,10 @@ static void esp_akm_set_rate(struct snd_akm4xxx *ak, unsigned int rate)
       snd_akm4xxx_reset(ak,1);
       if(!rate)
 	return;
-      else if( rate < 48000)
-	snd_akm4xxx_set(ak, 0, 2, pwr & ~0xC0);
+      else if( rate <= 48000)
+	snd_akm4xxx_set(ak, 0, 2, pwr & 0xCF);
       else
-	snd_akm4xxx_set(ak, 0, 2, (pwr & ~0xC0) | 0x40);
+	snd_akm4xxx_set(ak, 0, 2, (pwr & 0xCF) | 0x10);
       snd_akm4xxx_reset(ak,0);
     }
 }
